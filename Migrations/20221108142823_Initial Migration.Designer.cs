@@ -12,7 +12,7 @@ using Project_API.Data;
 namespace Project_API.Migrations
 {
     [DbContext(typeof(ItemdbContext))]
-    [Migration("20221023142605_Initial Migration")]
+    [Migration("20221108142823_Initial Migration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,6 +50,28 @@ namespace Project_API.Migrations
                     b.ToTable("BorrowedItems");
                 });
 
+            modelBuilder.Entity("Project_API.Models.Entities.Fine", b =>
+                {
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("StudentId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("FineAmount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReturnedTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ItemId", "StudentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.ToTable("Fines");
+                });
+
             modelBuilder.Entity("Project_API.Models.Entities.Item", b =>
                 {
                     b.Property<Guid>("Id")
@@ -59,6 +81,9 @@ namespace Project_API.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PricePerItem")
+                        .HasColumnType("int");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -87,6 +112,25 @@ namespace Project_API.Migrations
                 });
 
             modelBuilder.Entity("Project_API.Models.Entities.BorrowedItem", b =>
+                {
+                    b.HasOne("Project_API.Models.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Project_API.Models.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Project_API.Models.Entities.Fine", b =>
                 {
                     b.HasOne("Project_API.Models.Entities.Item", "Item")
                         .WithMany()

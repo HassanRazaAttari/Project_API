@@ -22,12 +22,29 @@ namespace Project_API.Controllers
             return Ok(await itemdbContext.Items.ToListAsync());
         }
 
+        
+        [HttpGet]
+        [Route("{ItemName}")]
+        public async Task<IActionResult> GetItemByName(string ItemName)
+        {
+            var Itemss = from m in itemdbContext.Items
+                         select m;
+
+            if (!String.IsNullOrEmpty(ItemName))
+            {
+                Itemss = Itemss.Where(s => s.Name!.Contains(ItemName));
+            }
+
+            return Ok(await Itemss.ToListAsync());
+        }
+
+
         [HttpGet]
         [Route("{id:Guid}")]
-        public async Task<IActionResult> GetItemById([FromRoute]Guid id)
+        public async Task<IActionResult> GetItemById([FromRoute] Guid id)
         {
             var item = await itemdbContext.Items.FindAsync(id);
-            if(item == null)
+            if (item == null)
             {
                 return NotFound();
 
@@ -36,15 +53,21 @@ namespace Project_API.Controllers
 
         }
 
-
         [HttpPost]
 
         public async Task<IActionResult> AddItem(Item item)
         {
             item.Id = Guid.NewGuid();
+            ApiResponse response = new ApiResponse();
             await itemdbContext.Items.AddAsync(item);
             await itemdbContext.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetItemById),new {id = item.Id}, item);
+
+            response.isSuccess = true;
+            response.statusCode = StatusCodes.Status200OK.ToString();
+            response.message = "Record Saved";
+
+            return Ok(response);
+            //return CreatedAtAction(nameof(GetItemById),new {id = item.Id}, item);
 
         }
 
@@ -53,6 +76,7 @@ namespace Project_API.Controllers
 
         public async Task<IActionResult> UpdateItem([FromRoute] Guid id, [FromBody] Item updateItem)
         {
+            ApiResponse response = new ApiResponse();
             var existingItem = await itemdbContext.Items.FindAsync(id);
             if(existingItem == null)
             {
@@ -64,7 +88,13 @@ namespace Project_API.Controllers
         
             await itemdbContext.SaveChangesAsync();
 
-            return Ok(existingItem);
+            response.isSuccess = true;
+            response.statusCode = StatusCodes.Status200OK.ToString();
+            response.message = "Record Updated";
+
+            return Ok(response);
+
+            //return Ok(existingItem);
         
         }
 
@@ -73,6 +103,7 @@ namespace Project_API.Controllers
 
         public async Task<IActionResult> DeleteItem([FromRoute] Guid id)
         {
+            ApiResponse response = new ApiResponse();
             var existingItem = await itemdbContext.Items.FindAsync(id);
 
             if(existingItem == null)
@@ -83,7 +114,14 @@ namespace Project_API.Controllers
             itemdbContext.Items.Remove(existingItem);
             await itemdbContext.SaveChangesAsync();
 
-            return Ok();
+
+            response.isSuccess = true;
+            response.statusCode = StatusCodes.Status200OK.ToString();
+            response.message = "Record Deleted";
+
+            return Ok(response);
+
+            //return Ok();
         }
 
         

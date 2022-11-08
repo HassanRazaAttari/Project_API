@@ -17,12 +17,21 @@ namespace Project_API.Data
                 table.ItemId,
                 table.StudentId
             });
+
+            builder.Entity<Fine>().HasKey(table => new {
+                table.ItemId,
+                table.StudentId,
+            });
+
+
         }
 
         public DbSet<Item> Items { get; set; }
 
         public DbSet<Student> Students { get; set; }
         public DbSet<BorrowedItem> BorrowedItems { get; set; }
+
+        public DbSet<Fine> Fines { get; set; }
         
     }
 }

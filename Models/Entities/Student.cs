@@ -4,7 +4,7 @@ namespace Project_API.Models.Entities
 {
     public class Student
     {
-        [Key]
+        
         public String StudentId { get; set; }
         public string StudentName { get; set; }
 

@@ -17,23 +17,57 @@ namespace Project_API.Controllers
             this.itemdbContext = itemdbContext;
 
         }
+
+        
+
         [HttpGet]
         public async Task<IActionResult> GetAllBorrowedItems()
         {
-            return Ok(await itemdbContext.BorrowedItems.ToListAsync());
+            
+            var innerJoin = from s in itemdbContext.Items // outer sequence
+                            join st in itemdbContext.BorrowedItems //inner sequence 
+                            on s.Id equals st.ItemId
+                            join ab in itemdbContext.Students
+                            on st.StudentId equals ab.StudentId// key selector 
+                            select new
+                            { // result selector 
+                                ItemId = s.Id,
+                                StudentId = ab.StudentId,
+                                ItemName = s.Name,
+                                StudentName = ab.StudentName,
+                                QuantityBorrowed = st.QuantityBorrowed,
+                                TimeBorrowed = st.TimeBorrowed,
+                                Timetobereturned = st.TimeToBeReturned
+
+                            };
+            return Ok(innerJoin);
         }
 
-        [HttpGet]
-        [Route("{ItemId:Guid}/{StudentId}")]
-        public async Task<IActionResult> GetBorrowedItemById([FromRoute] Guid ItemId, string StudentId)
-        {
-            var item = await itemdbContext.BorrowedItems.FindAsync(ItemId, StudentId);
-            if (item == null)
-            {
-                return NotFound();
 
-            }
-            return Ok(item);
+
+        [HttpGet]
+        [Route("{StudentName}")]
+        public async Task<IActionResult> GetBorrowedItemByStudentName( string StudentName)
+        {
+            var innerJoin = from s in itemdbContext.Items // outer sequence
+                            join st in itemdbContext.BorrowedItems //inner sequence 
+                            on s.Id equals st.ItemId
+                            join ab in itemdbContext.Students
+                            on st.StudentId equals ab.StudentId
+                            where ab.StudentName == StudentName // key selector 
+                            select new
+                            { // result selector
+                                ItemId = s.Id,
+                                StudentId = ab.StudentId,
+                                ItemName = s.Name,
+                                StudentName = ab.StudentName,
+                                QuantityBorrowed = st.QuantityBorrowed,
+                                TimeBorrowed = st.TimeBorrowed,
+                                Timetobereturned = st.TimeToBeReturned
+
+                            };
+
+            return Ok(innerJoin);
 
         }
 
@@ -50,7 +84,7 @@ namespace Project_API.Controllers
                   TimeToBeReturned = itemviewmodel.TimeToBeReturned,    
                   ItemId = itemviewmodel.ItemId,      
                   StudentId = itemviewmodel.StudentId,
-                  Student = itemviewmodel.Student
+                  
                 };
 
 
@@ -112,13 +146,14 @@ namespace Project_API.Controllers
             existingItem.TimeToBeReturned = itemviewmodel.TimeToBeReturned;
 
 
-
- 
+            response.isSuccess = true;
+            response.statusCode = StatusCodes.Status200OK.ToString();
+            response.message = "Record Updated";
 
 
             await itemdbContext.SaveChangesAsync();
 
-            return Ok(existingItem);
+            return Ok(response);
 
         }
 
@@ -128,6 +163,8 @@ namespace Project_API.Controllers
         public async Task<IActionResult> DeleteItem([FromRoute] Guid id, string StudentId)
         {
             var existingItem = await itemdbContext.BorrowedItems.FindAsync(id, StudentId);
+            ApiResponse response = new ApiResponse();
+
 
             if (existingItem == null)
             {
@@ -143,9 +180,18 @@ namespace Project_API.Controllers
 
 
             itemdbContext.BorrowedItems.Remove(existingItem);
+
+            
+
             await itemdbContext.SaveChangesAsync();
 
-            return Ok();
+            response.isSuccess = true;
+            response.statusCode = StatusCodes.Status200OK.ToString();
+            response.message = "Record Deleted";
+            //response.data = record;
+           
+
+            return Ok(response);
         }
 
 
