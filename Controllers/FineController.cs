@@ -140,7 +140,6 @@ namespace Project_API.Controllers
 
         [HttpDelete]
         [Route("{id:Guid}/{StudentId}")]
-        //[Route("api/item/{id1}/{id2}")]
         public async Task<IActionResult> DeleteFineItem([FromRoute] Guid id, string StudentId)
         {
             var existingItem = await itemdbContext.Fines.FindAsync(id, StudentId);
