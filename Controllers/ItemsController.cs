@@ -36,6 +36,9 @@ namespace Project_API.Controllers
             }
 
             return Ok(await Itemss.ToListAsync());
+
+            
+
         }
 
 

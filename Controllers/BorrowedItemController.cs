@@ -46,15 +46,16 @@ namespace Project_API.Controllers
 
 
         [HttpGet]
-        [Route("{StudentName}")]
-        public async Task<IActionResult> GetBorrowedItemByStudentName( string StudentName)
+        [Route("{StudentId}")]
+        //[Route("{StudentName}")]
+        public async Task<IActionResult> GetBorrowedItemByStudentName( string StudentId)
         {
             var innerJoin = from s in itemdbContext.Items // outer sequence
                             join st in itemdbContext.BorrowedItems //inner sequence 
                             on s.Id equals st.ItemId
                             join ab in itemdbContext.Students
                             on st.StudentId equals ab.StudentId
-                            where ab.StudentName == StudentName // key selector 
+                            where ab.StudentId == StudentId // key selector 
                             select new
                             { // result selector
                                 ItemId = s.Id,

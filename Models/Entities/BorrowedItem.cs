@@ -10,8 +10,7 @@ namespace Project_API.Models.Entities
 
         public string TimeBorrowed { get; set; }
 
-        public string TimeToBeReturned { get; set; }
-
+        public  string TimeToBeReturned { get; set; }
         
         [ForeignKey("Item")]
         public Guid ItemId { get; set; }
