@@ -8,7 +8,7 @@ using Project_API.Data;
 
 #nullable disable
 
-namespace Project_API.Migrations
+namespace ProjectAPI.Migrations
 {
     [DbContext(typeof(ItemdbContext))]
     partial class ItemdbContextModelSnapshot : ModelSnapshot
@@ -17,10 +17,10 @@ namespace Project_API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.10")
+                .HasAnnotation("ProductVersion", "7.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Project_API.Models.Entities.BorrowedItem", b =>
                 {

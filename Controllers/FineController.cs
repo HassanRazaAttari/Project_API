@@ -13,6 +13,7 @@ using System.Data;
 using System.ComponentModel.Design;
 using System.Security.Cryptography;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Collections.Generic;
 
 namespace Project_API.Controllers
 {
@@ -29,24 +30,49 @@ namespace Project_API.Controllers
         }
 
 
+
+
+        static bool compareDates(string datetime1, DateTime datetime2)
+        {
+            string datetimee = datetime2.ToString();
+            int date1 = Convert.ToInt32(datetime1.Substring(0, 2));
+            int month1 = Convert.ToInt32(datetime1.Substring(3, 2));
+            int year1 = Convert.ToInt32(datetime1.Substring(6, 4));
+
+            int date2 = Convert.ToInt32(datetimee.Substring(0, 2));
+            int month2 = Convert.ToInt32(datetimee.Substring(3, 2));
+            int year2 = Convert.ToInt32(datetimee.Substring(6, 4));
+
+            return (date1 + (month1 * 12) + (year1 * 365)) > (date2 + (month2 * 12) + (year2 * 365));
+        }
+
+
+
+
+
+        [Route("/api/Fine/GetAllFines")]
         [HttpGet]
+
         //public async Task<IEnumerable<BorrowedItem>> GetAllFineItems()
         public async Task<IActionResult> GetAllFineItems()
 
         {
 
+            foreach (var item in itemdbContext.Fines)
+            {
+                itemdbContext.Fines.Remove(item);
+            }
+            itemdbContext.SaveChanges();
 
             DateTime now = DateTime.Now;
             var dateTime = DateTime.Now;
-            /*
+
                         var query = from da in itemdbContext.BorrowedItems
                                     join st in itemdbContext.Items
                                     on da.ItemId equals st.Id
                                     join ab in itemdbContext.Students
                                     on da.StudentId equals ab.StudentId
-                                    // where DateTime.Compare(Convert.ToDateTime(da.TimeToBeReturned), DateTime.Now) < 0
-                                    // where DateTime.Compare(DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0
-                                    //where DateTime.Compare(DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0
+                                   
                                     select new
                                     {
                                         FinedAmount = (st.PricePerItem * da.QuantityBorrowed) / 10,
@@ -54,142 +80,174 @@ namespace Project_API.Controllers
                                         StudentId = ab.StudentId,
                                         ItemId = st.Id,
                                         StudentName = ab.StudentName,
-                                        coondition = DateTime.Compare(DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0,
-                                        //  = DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture),
-                                        todaytime = DateTime.Now,
-                                        // Timeabc = DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture)
-                                        TimeToBeReturned = typeof()
+                                        Condition = DateTime.Compare(Convert.ToDateTime(da.TimeToBeReturned), DateTime.Now) < 0
+
+
                                     };
-            */
-
-            List<Fine> finees = new List<Fine>();
-
-            foreach (var item in itemdbContext.BorrowedItems)
+            List<Fine> listobj = new List<Fine>(); 
+            string zyx = "";
+            foreach (var abc in query)
             {
-                if (DateTime.Compare(DateTime.ParseExact(item.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0)
+                if (abc.Condition == true)
                 {
-                    var studid = item.StudentId;
-                    var query = from da in itemdbContext.BorrowedItems
-                                join st in itemdbContext.Items
-                                on da.ItemId equals st.Id
-                                join ab in itemdbContext.Students
-                                on da.StudentId equals ab.StudentId
-                                where da.StudentId == studid & da.ItemId == item.ItemId
-
-                                select new
-                                {
-                                    FinedAmount = (st.PricePerItem * da.QuantityBorrowed) / 10,
-                                    ItemName = st.Name,
-                                    StudentId = ab.StudentId,
-                                    ItemId = st.Id,
-                                    StudentName = ab.StudentName
-                                };
-
-                    Fine myInt = (Fine)query;
-                    finees.Add(myInt);
+                    
+                   
+                    
+                    
+                    Fine objfine= new Fine();
+                    objfine.ItemId = abc.ItemId;
+                    objfine.StudentId = abc.StudentId;
+                    objfine.FineAmount = abc.FinedAmount;
+                    objfine.ReturnedTime = "";
+                    listobj.Add(objfine);
+                    await itemdbContext.Fines.AddAsync(objfine);
 
 
 
-                    //itemdbContext.Fines.Remove(item);
                 }
-                //itemdbContext.SaveChanges();
+                
 
-
-                /* IQueryable<BorrowedItem> query1 = itemdbContext.BorrowedItems;
-
-
-                 query1 = query1.ToList().Where(e => DateTime.Compare(DateTime.ParseExact(e.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0);
-
-
-                     return await query1.ToListAsync();
-                 */
-                /*       var innerJoin = from s in itemdbContext.Items // outer sequence
-                                       join st in itemdbContext.Fines //inner sequence 
-                                       on s.Id equals st.ItemId
-                                       join ab in itemdbContext.Students
-                                       on st.StudentId equals ab.StudentId
-                                       join cd in itemdbContext.BorrowedItems
-                                       on s.Id equals cd.ItemId// key selector 
-                                       select new
-                                       { // result selector 
-                                           ItemId = s.Id,
-                                           StudentId = ab.StudentId,
-                                           ItemName = s.Name,
-                                           StudentName = ab.StudentName,
-                                           FineAmount = st.FineAmount,
-                                           ReturnedTime = st.ReturnedTime,
-                                           TimeToBeReturned = cd.TimeToBeReturned
-
-                                       };
-                */
-               
             }
-            return Ok(finees);
-        }
-
-        [HttpGet]
-        [Route("{StudentId}")]
-        public async Task<IActionResult> GetFinedItemByStudentId(string StudentId)
-        {
-
-            
-
+            await itemdbContext.SaveChangesAsync();
 
             var innerJoin = from s in itemdbContext.Items // outer sequence
                             join st in itemdbContext.Fines //inner sequence 
                             on s.Id equals st.ItemId
                             join ab in itemdbContext.Students
                             on st.StudentId equals ab.StudentId
-                            join cd in itemdbContext.BorrowedItems
-                            on s.Id equals cd.ItemId
-                            where ab.StudentId == StudentId// key selector 
+                             // key selector 
                             select new
-                            { // result selector 
+                            { // result selector
                                 ItemId = s.Id,
                                 StudentId = ab.StudentId,
                                 ItemName = s.Name,
                                 StudentName = ab.StudentName,
-                                FineAmount = st.FineAmount,
-                                ReturnedTime = st.ReturnedTime,
-                                TimeToBeReturned = cd.TimeToBeReturned
-
+                                FinedAmount = st.FineAmount,
+                                TimeBorrowed = st.ReturnedTime
                             };
 
             return Ok(innerJoin);
 
+
         }
-
-
-        [HttpDelete]
-        [Route("{id:Guid}/{StudentId}")]
-        public async Task<IActionResult> DeleteFineItem([FromRoute] Guid id, string StudentId)
-        {
-            var existingItem = await itemdbContext.Fines.FindAsync(id, StudentId);
-            ApiResponse response = new ApiResponse();
-
-
-            if (existingItem == null)
-            {
-                return NotFound();
-            }
 
             
+            
+           
 
-            itemdbContext.Fines.Remove(existingItem);
+        [HttpGet]
+        [Route("/api/Fine/GetFineByStudentId/{StudentId}")]
+        public async Task<IActionResult> GetFinedItemByStudentId(string StudentId)
+        {
 
 
 
+            foreach (var item in itemdbContext.Fines)
+            {
+                itemdbContext.Fines.Remove(item);
+            }
+            itemdbContext.SaveChanges();
+
+            DateTime now = DateTime.Now;
+            var dateTime = DateTime.Now;
+
+            var query = from da in itemdbContext.BorrowedItems
+                        join st in itemdbContext.Items
+                        on da.ItemId equals st.Id
+                        join ab in itemdbContext.Students
+                        on da.StudentId equals ab.StudentId
+
+                        select new
+                        {
+                            FinedAmount = (st.PricePerItem * da.QuantityBorrowed) / 10,
+                            ItemName = st.Name,
+                            StudentId = ab.StudentId,
+                            ItemId = st.Id,
+                            StudentName = ab.StudentName,
+                            Condition = DateTime.Compare(Convert.ToDateTime(da.TimeToBeReturned), DateTime.Now) < 0
+
+
+                        };
+            List<Fine> listobj = new List<Fine>();
+            string zyx = "";
+            foreach (var abc in query)
+            {
+                if (abc.Condition == true)
+                {
+
+
+
+
+                    Fine objfine = new Fine();
+                    objfine.ItemId = abc.ItemId;
+                    objfine.StudentId = abc.StudentId;
+                    objfine.FineAmount = abc.FinedAmount;
+                    objfine.ReturnedTime = "";
+                    listobj.Add(objfine);
+                    await itemdbContext.Fines.AddAsync(objfine);
+
+
+
+                }
+
+
+            }
             await itemdbContext.SaveChangesAsync();
 
-            response.isSuccess = true;
-            response.statusCode = StatusCodes.Status200OK.ToString();
-            response.message = "Record Deleted";
-            //response.data = record;
+            var innerJoin = from s in itemdbContext.Items // outer sequence
+                            join st in itemdbContext.Fines //inner sequence 
+                            on s.Id equals st.ItemId
+                            join ab in itemdbContext.Students
+                            on st.StudentId equals ab.StudentId
+                            where st.StudentId == StudentId
+                            // key selector 
+                            select new
+                            { // result selector
+                                ItemId = s.Id,
+                                StudentId = ab.StudentId,
+                                ItemName = s.Name,
+                                StudentName = ab.StudentName,
+                                FinedAmount = st.FineAmount,
+                                TimeBorrowed = st.ReturnedTime
+                            };
+
+            return Ok(innerJoin);
 
 
-            return Ok(response);
         }
 
+        /*
+                [HttpDelete]
+                [Route("{id:Guid}/{StudentId}")]
+                public async Task<IActionResult> DeleteFineItem([FromRoute] Guid id, string StudentId)
+                {
+                    var existingItem = await itemdbContext.Fines.FindAsync(id, StudentId);
+                    ApiResponse response = new ApiResponse();
+
+
+                    if (existingItem == null)
+                    {
+                        return NotFound();
+                    }
+
+
+
+                    itemdbContext.Fines.Remove(existingItem);
+
+
+
+                    await itemdbContext.SaveChangesAsync();
+
+                    response.isSuccess = true;
+                    response.statusCode = StatusCodes.Status200OK.ToString();
+                    response.message = "Record Deleted";
+                    //response.data = record;
+
+
+                    return Ok(response);
+                }
+        */
+        /*
         [HttpPut]
         [Route("{id:Guid}/{StudentId}")]
         public async Task<IActionResult> UpdateFineItem([FromRoute] Guid id, string StudentId, [FromBody] UpdateFineItemsViewModel itemviewmodel)
@@ -229,6 +287,8 @@ namespace Project_API.Controllers
 
         }
 
-
+        */
     }
+
 }
+        

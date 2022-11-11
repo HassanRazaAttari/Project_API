@@ -9,20 +9,21 @@ using Project_API.Data;
 
 #nullable disable
 
-namespace Project_API.Migrations
+namespace ProjectAPI.Migrations
 {
     [DbContext(typeof(ItemdbContext))]
-    [Migration("20221108142823_Initial Migration")]
+    [Migration("20221111184836_Initial Migration")]
     partial class InitialMigration
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.10")
+                .HasAnnotation("ProductVersion", "7.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Project_API.Models.Entities.BorrowedItem", b =>
                 {
