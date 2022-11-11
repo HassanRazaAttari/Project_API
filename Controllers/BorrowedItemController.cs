@@ -18,8 +18,7 @@ namespace Project_API.Controllers
 
         }
 
-        
-
+        [Route("/api/BorrowedItem/GetAllBorrowedItems")]
         [HttpGet]
         public async Task<IActionResult> GetAllBorrowedItems()
         {
@@ -46,9 +45,9 @@ namespace Project_API.Controllers
 
 
         [HttpGet]
-        [Route("{StudentId}")]
+        [Route("/api/BorrowedItem/GetBorrowedItemByStudentId/{StudentId}")]
         //[Route("{StudentName}")]
-        public async Task<IActionResult> GetBorrowedItemByStudentName( string StudentId)
+        public async Task<IActionResult> GetBorrowedItemByStudentId( string StudentId)
         {
             var innerJoin = from s in itemdbContext.Items // outer sequence
                             join st in itemdbContext.BorrowedItems //inner sequence 
@@ -73,7 +72,7 @@ namespace Project_API.Controllers
         }
 
         [HttpPost]
-
+        [Route("/api/BorrowedItem/AddBorrowedItem")]
 
         public async Task<ApiResponse> AddBorrowedItem(BorrowedItemsViewModel itemviewmodel)
         {
@@ -112,7 +111,7 @@ namespace Project_API.Controllers
 
 
         [HttpPut]
-        [Route("{id:Guid}/{StudentId}")]
+        [Route("/api/BorrowedItem/UpdateBorrowedItemByItemIdAndStudentId/{id:Guid}/{StudentId}")]
 
         public async Task<IActionResult> UpdateItem([FromRoute] Guid id, string StudentId,[FromBody] updateborrowitemsviewmodel itemviewmodel)
         {
@@ -159,7 +158,7 @@ namespace Project_API.Controllers
         }
 
         [HttpDelete]
-        [Route("{id:Guid}/{StudentId}")]
+        [Route("/api/BorrowedItem/DeleteBorrowedItemByItemIdAndStudentId/{id:Guid}/{StudentId}")]
         //[Route("api/item/{id1}/{id2}")]
         public async Task<IActionResult> DeleteItem([FromRoute] Guid id, string StudentId)
         {

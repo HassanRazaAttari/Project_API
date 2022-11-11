@@ -16,7 +16,9 @@ namespace Project_API.Controllers
             this.itemdbContext = itemdbContext;
 
         }
+
         [HttpGet]
+        [Route("/api/Items/GetAllItems")]
         public async Task<IActionResult> GetAllItems()
         {
             return Ok(await itemdbContext.Items.ToListAsync());
@@ -24,7 +26,7 @@ namespace Project_API.Controllers
 
         
         [HttpGet]
-        [Route("{ItemName}")]
+        [Route("/api/Items/GetItemByItemName/{ItemName}")]
         public async Task<IActionResult> GetItemByName(string ItemName)
         {
             var Itemss = from m in itemdbContext.Items
@@ -43,7 +45,7 @@ namespace Project_API.Controllers
 
 
         [HttpGet]
-        [Route("{id:Guid}")]
+        [Route("/api/Items/GetItemByItemId/{id:Guid}")]
         public async Task<IActionResult> GetItemById([FromRoute] Guid id)
         {
             var item = await itemdbContext.Items.FindAsync(id);
@@ -57,7 +59,7 @@ namespace Project_API.Controllers
         }
 
         [HttpPost]
-
+        [Route("/api/Items/AddItem")]
         public async Task<IActionResult> AddItem(Item item)
         {
             item.Id = Guid.NewGuid();
@@ -75,7 +77,7 @@ namespace Project_API.Controllers
         }
 
         [HttpPut]
-        [Route("{id:Guid}")]
+        [Route("/api/Items/UpdateItemByItemId/{id:Guid}")]
 
         public async Task<IActionResult> UpdateItem([FromRoute] Guid id, [FromBody] Item updateItem)
         {
@@ -88,6 +90,7 @@ namespace Project_API.Controllers
 
             existingItem.Name = updateItem.Name;
             existingItem.Quantity = updateItem.Quantity;
+            existingItem.PricePerItem = updateItem.PricePerItem;
         
             await itemdbContext.SaveChangesAsync();
 
@@ -102,7 +105,7 @@ namespace Project_API.Controllers
         }
 
         [HttpDelete]
-        [Route("{id:Guid}")]
+        [Route("/api/Items/DeleteItemByItemId/{id:Guid}")]
 
         public async Task<IActionResult> DeleteItem([FromRoute] Guid id)
         {

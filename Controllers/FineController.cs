@@ -12,6 +12,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.ComponentModel.Design;
 using System.Security.Cryptography;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Project_API.Controllers
 {
@@ -29,81 +30,102 @@ namespace Project_API.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllFines() {
+        //public async Task<IEnumerable<BorrowedItem>> GetAllFineItems()
+        public async Task<IActionResult> GetAllFineItems()
 
-            SqlConnection db = new SqlConnection("Server=DESKTOP-NHF27C9\\SQLEXPRESS;Database=ItemsDb;Trusted_Connection=true");
-            SqlCommand cmd = new SqlCommand("SELECT BorrowedItems.TimeToBeReturned, Students.StudentName, Items.Name, BorrowedItems.QuantityBorrowed from BorrowedItems INNER JOIN Items ON BorrowedItems.ItemId=Items.Id INNER JOIN Students ON Students.StudentId=BorrowedItems.StudentId", db);
-            int cnt = 0;
+        {
 
-            List<string> tmp = new List<string>();
-            List<string> tmp2 = new List<string>();
-            List<string> fine = new List<string>();
 
-            string current = DateTime.Now.ToString("MM/dd/yyyy");
-            db.Open();
+            DateTime now = DateTime.Now;
+            var dateTime = DateTime.Now;
+            /*
+                        var query = from da in itemdbContext.BorrowedItems
+                                    join st in itemdbContext.Items
+                                    on da.ItemId equals st.Id
+                                    join ab in itemdbContext.Students
+                                    on da.StudentId equals ab.StudentId
+                                    // where DateTime.Compare(Convert.ToDateTime(da.TimeToBeReturned), DateTime.Now) < 0
+                                    // where DateTime.Compare(DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0
+                                    //where DateTime.Compare(DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0
+                                    select new
+                                    {
+                                        FinedAmount = (st.PricePerItem * da.QuantityBorrowed) / 10,
+                                        ItemName = st.Name,
+                                        StudentId = ab.StudentId,
+                                        ItemId = st.Id,
+                                        StudentName = ab.StudentName,
+                                        coondition = DateTime.Compare(DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0,
+                                        //  = DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture),
+                                        todaytime = DateTime.Now,
+                                        // Timeabc = DateTime.ParseExact(da.TimeToBeReturned, "MM-dd-yyyy HH:mm:ss", CultureInfo.InvariantCulture)
+                                        TimeToBeReturned = typeof()
+                                    };
+            */
 
-            char[] currentDate = current.ToCharArray();
+            List<Fine> finees = new List<Fine>();
 
-            string cmp2 = "";
-            cmp2 += currentDate[0];
-            cmp2 += currentDate[1];
-
-            int currentMonth = Int32.Parse(cmp2);
-
-            cmp2 = "";
-            cmp2 += currentDate[3];
-            cmp2 += currentDate[4];
-
-            int currentDay = Int32.Parse(cmp2);
-
-            cmp2 = "";
-            cmp2 += currentDate[6];
-            cmp2 += currentDate[7];
-            cmp2 += currentDate[8];
-            cmp2 += currentDate[9];
-
-            int currentYear = Int32.Parse(cmp2);
-
-            SqlDataReader reader = cmd.ExecuteReader();
-            while ( reader.Read() ){
-                tmp.Add( reader[0].ToString() );
-                tmp2.Add(reader[1].ToString() );
-            }
-            db.Close();
-
-            for(int i = 0; i<tmp.Count; i++)
+            foreach (var item in itemdbContext.BorrowedItems)
             {
-                char[] dbDate = tmp[i].ToCharArray();
-                
-                string cmp1 = "";
-                cmp1 += dbDate[0];
-                cmp1 += dbDate[1];
-
-                int month = Int32.Parse(cmp1);
-
-                cmp1 = "";
-                cmp1 += dbDate[3];
-                cmp1 += dbDate[4];
-
-                int day = Int32.Parse(cmp1);
-
-                cmp1 = "";
-                cmp1 += dbDate[6];
-                cmp1 += dbDate[7];
-                cmp1 += dbDate[8];
-                cmp1 += dbDate[9];
-
-                int year = Int32.Parse(cmp1);
-
-                if (currentDay > day & currentMonth > month & currentYear > year) { }
-                else
+                if (DateTime.Compare(DateTime.ParseExact(item.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0)
                 {
-                    tmp2[i] = tmp2[i] + "2000";
-                }
-            }
-            return (Ok(tmp2));
-        }
+                    var studid = item.StudentId;
+                    var query = from da in itemdbContext.BorrowedItems
+                                join st in itemdbContext.Items
+                                on da.ItemId equals st.Id
+                                join ab in itemdbContext.Students
+                                on da.StudentId equals ab.StudentId
+                                where da.StudentId == studid & da.ItemId == item.ItemId
 
+                                select new
+                                {
+                                    FinedAmount = (st.PricePerItem * da.QuantityBorrowed) / 10,
+                                    ItemName = st.Name,
+                                    StudentId = ab.StudentId,
+                                    ItemId = st.Id,
+                                    StudentName = ab.StudentName
+                                };
+
+                    Fine myInt = (Fine)query;
+                    finees.Add(myInt);
+
+
+
+                    //itemdbContext.Fines.Remove(item);
+                }
+                //itemdbContext.SaveChanges();
+
+
+                /* IQueryable<BorrowedItem> query1 = itemdbContext.BorrowedItems;
+
+
+                 query1 = query1.ToList().Where(e => DateTime.Compare(DateTime.ParseExact(e.TimeToBeReturned, "MM-dd-yyyy", CultureInfo.InvariantCulture), DateTime.Now) < 0);
+
+
+                     return await query1.ToListAsync();
+                 */
+                /*       var innerJoin = from s in itemdbContext.Items // outer sequence
+                                       join st in itemdbContext.Fines //inner sequence 
+                                       on s.Id equals st.ItemId
+                                       join ab in itemdbContext.Students
+                                       on st.StudentId equals ab.StudentId
+                                       join cd in itemdbContext.BorrowedItems
+                                       on s.Id equals cd.ItemId// key selector 
+                                       select new
+                                       { // result selector 
+                                           ItemId = s.Id,
+                                           StudentId = ab.StudentId,
+                                           ItemName = s.Name,
+                                           StudentName = ab.StudentName,
+                                           FineAmount = st.FineAmount,
+                                           ReturnedTime = st.ReturnedTime,
+                                           TimeToBeReturned = cd.TimeToBeReturned
+
+                                       };
+                */
+               
+            }
+            return Ok(finees);
+        }
 
         [HttpGet]
         [Route("{StudentId}")]
