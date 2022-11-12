@@ -160,7 +160,7 @@ namespace Project_API.Controllers
         [HttpDelete]
         [Route("/api/BorrowedItem/DeleteBorrowedItemByItemIdAndStudentId/{id:Guid}/{StudentId}")]
         //[Route("api/item/{id1}/{id2}")]
-        public async Task<IActionResult> DeleteItem([FromRoute] Guid id, string StudentId, int ReturnedQuantity)
+        public async Task<IActionResult> DeleteItem([FromRoute] Guid id, string StudentId)
         {
             var existingItem = await itemdbContext.BorrowedItems.FindAsync(id, StudentId);
             ApiResponse response = new ApiResponse();
@@ -175,15 +175,16 @@ namespace Project_API.Controllers
             var record2 = await itemdbContext.BorrowedItems.Where(a => a.ItemId == id).FirstOrDefaultAsync();
             if (record != null)
             {
-                record.Quantity = record.Quantity + ReturnedQuantity;
-                record2.QuantityBorrowed = record2.QuantityBorrowed - ReturnedQuantity;
+                record.Quantity = record.Quantity + record2.QuantityBorrowed;
+                //record.Quantity = record.Quantity + ReturnedQuantity;
+                //record2.QuantityBorrowed = record2.QuantityBorrowed - ReturnedQuantity;
             }
 
-            if(record2.QuantityBorrowed == 0)
-            {
+           // if(record2.QuantityBorrowed == 0)
+            //{
                 itemdbContext.BorrowedItems.Remove(existingItem);
 
-            }
+           // }
 
 
 
