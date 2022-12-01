@@ -123,7 +123,7 @@ namespace Project_API.Controllers
                                 ItemName = s.Name,
                                 StudentName = ab.StudentName,
                                 FinedAmount = st.FineAmount,
-                                TimeBorrowed = st.ReturnedTime
+                               // TimeBorrowed = st.ReturnedTime
                             };
 
             return Ok(innerJoin);
